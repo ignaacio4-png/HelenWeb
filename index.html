@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Helen Zapatos - Catálogo</title>
+    <style>
+        /* =========================================
+           ESTILO Y COLORES (CSS) 🎨
+           ========================================= */
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+
+        body { background-color: #fdf6f6; color: #333; padding-bottom: 80px; }
+
+        /* --- HEADER ACTUALIZADO --- */
+        header {
+            background: linear-gradient(135deg, #ff7f50, #ff6b81);
+            color: white;
+            text-align: center;
+            padding: 3rem 1rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            position: relative; /* ¡Esto es CLAVE para que funcionen las esquinas! */
+        }
+
+        header h1 { font-size: 2.5rem; letter-spacing: 2px; margin-bottom: 10px; }
+        header p { font-size: 1.2rem; font-weight: 300; }
+
+        /* EL LOGO (Izquierda) */
+        .logo-img {
+            position: absolute; /* Lo sacamos del flujo normal */
+            top: 20px;          /* 20px desde arriba */
+            left: 20px;         /* 20px desde la izquierda */
+            width: 80px;        /* Tamaño del logo (ajustalo si querés) */
+            height: auto;       /* Mantiene la proporción */
+            border-radius: 50%; /* Opcional: Si querés que sea redondo */
+            background: white;  /* Un fondito blanco si es transparente */
+            padding: 5px;
+        }
+
+        /* EL LINK DE INSTAGRAM (Derecha) */
+        .instagram-link {
+            position: absolute;
+            top: 30px;
+            right: 20px;
+            color: white;
+            text-decoration: none; /* Sin subrayado */
+            font-weight: bold;
+            font-size: 1rem;
+            border: 1px solid white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            transition: background 0.3s;
+        }
+
+        .instagram-link:hover {
+            background: white;
+            color: #ff7f50;
+        }
+
+        /* CONTENEDOR PRINCIPAL */
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; text-align: center; }
+        
+        h2.section-title { 
+            color: #ff7f50; 
+            margin-bottom: 30px; 
+            border-bottom: 2px solid #ffcece;
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+
+        /* GRILLA DE PRODUCTOS */
+        .product-grid {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            flex-wrap: wrap; /* Permite que bajen si no entran */
+        }
+
+        /* TARJETA DE ZAPATO (ESTILO REVISTA) */
+        .product-card {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            width: 280px; /* Ancho fijo */
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+        .product-card:hover { transform: translateY(-5px); }
+
+        /* FOTOS UNIFORMES */
+        .product-card img {
+            width: 100%;
+            height: 250px; /* ALTURA FIJA: Todas las fotos medirán esto */
+            object-fit: cover; /* Recorta la imagen para que no se deforme */
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .price { color: #ff7f50; font-weight: bold; font-size: 1.3rem; margin-top: 5px; }
+        .description { color: #666; font-size: 0.9rem; margin-bottom: 10px; }
+
+        /* BOTÓN FLOTANTE DE WHATSAPP */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #25d366;
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            text-align: center;
+            font-size: 35px;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: transform 0.3s;
+        }
+        .whatsapp-float:hover { transform: scale(1.1); background-color: #128c7e; }
+
+        /* FOOTER */
+        footer { text-align: center; padding: 30px; color: #888; font-size: 0.8rem; margin-top: 50px; }
+/* --- ESTILO DEL ZOOM (LIGHTBOX) --- */
+        
+        /* El fondo negro (oculto por defecto) */
+        .modal-zoom {
+            display: none; /* No se ve al principio */
+            position: fixed;
+            z-index: 2000; /* ¡Encima de todo, incluso del botón de WhatsApp! */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9); /* Negro casi total */
+            justify-content: center;
+            align-items: center;
+            cursor: zoom-out; /* Muestra que podés salir tocando */
+        }
+
+        /* La imagen grande */
+        .modal-zoom img {
+            max-width: 90%;  /* Que no se salga de la pantalla */
+            max-height: 90%;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+            animation: entradaZoom 0.3s; /* Animación suave */
+        }
+
+        /* Animación para que aparezca creciendo */
+        @keyframes entradaZoom {
+            from {transform: scale(0.5); opacity: 0;}
+            to {transform: scale(1); opacity: 1;}
+        }
+
+        /* Cambiamos el cursor de las fotos pequeñas para que parezca botón */
+        .product-card img {
+            cursor: zoom-in; /* Aparece una lupita al pasar el mouse */
+        } /* --- CARRUSEL DE FOTOS (SLIDER) --- */
+        .carrusel {
+            display: flex;              /* Pone las fotos una al lado de la otra */
+            overflow-x: auto;           /* Permite scrollear horizontalmente */
+            scroll-snap-type: x mandatory; /* Hace que se "trabe" en cada foto (efecto imán) */
+            border-radius: 10px;
+            margin-bottom: 15px;
+            
+            /* Ocultamos la barra de scroll fea para que quede limpio */
+            scrollbar-width: none;      /* Firefox */
+        }
+        .carrusel::-webkit-scrollbar { 
+            display: none;              /* Chrome y Safari */
+        }
+
+        /* Ajustamos las imágenes DENTRO del carrusel */
+        .carrusel img {
+            flex: 0 0 100%;             /* Cada foto ocupa el 100% del ancho */
+            scroll-snap-align: start;   /* Se alinea al principio */
+            width: 100%;
+            height: 250px;              /* Misma altura que las otras */
+            object-fit: cover;
+            margin-bottom: 0;           /* Sacamos el margen viejo */
+            cursor: grab;               /* Manito para indicar que se mueve */
+        } /* --- CÓDIGO CORREGIDO PARA CELULARES --- */
+@media (max-width: 768px) {
+    
+    /* ACÁ ESTABA EL ERROR: Ahora llamamos a .product-grid, no a .grilla-productos */
+    .product-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* 2 columnas iguales */
+        gap: 10px; /* Espacio entre fotos */
+    }
+
+    /* Ajustes para que las tarjetas entren bien */
+    .product-card {
+        width: 100%; 
+        margin-bottom: 0;
+    }
+
+    /* Fotos del mismo tamaño */
+    .carrusel img, .product-card img {
+        width: 100%;
+        height: 150px; 
+        object-fit: cover;
+    }
+
+    .product-card h3 {
+        font-size: 13px;
+        margin: 5px 0;
+    }
+    
+    .price {
+        font-size: 15px;
+    }
+} </style>
+</head>
+<body>
+
+    <header>
+        <header>
+        <img src="logo.png" alt="Logo Helen" class="logo-img">
+
+        <a href="https://www.instagram.com/helen.zapatos" target="_blank" class="instagram-link">
+            Seguinos en IG 📸
+        </a>
+
+        <h1>HELEN ZAPATOS</h1>
+        <p>Tendencia & Comodidad </p>
+    </header>
+    </header>
+
+    <div class="container">
+        <h2 class="section-title">Nueva Colección</h2>
+        
+        <div class="product-grid">
+            
+            <div class="product-card">
+                <img src="zapato1.jpeg" alt="Zapato 1">
+                <h3>TEXANAS CHAIN BLACK</h3>
+                <p class="description">
+DETALLES: Caña arrugada con aplique de cadena colgante
+Ideal para fiesta.</p>
+                <p class="price">$45.000</p>
+            </div>
+<div class="product-card">
+                
+                <div class="carrusel">
+                    <img src="liverpoolchoco.jpeg">
+                    
+                    <img src="liverpoolchoco1.jpeg">
+                </div>
+                <h3>BORCEGOS DOBLE CAPA</h3>
+                <p class="description">Cierre por fuera y por dentro con plataforma 
+👢 Talles 35 AL 40
+Desliza para ver más fotos ↔️</p>
+
+                <p class="price">$59.000</p>
+            </div>
+<div class="product-card">
+                
+                <div class="carrusel">
+                    <img src="TEXANADAKOTA.jpeg">
+                    
+                    <img src="TEXANADAKOTA1.jpeg">
+<img src="TEXANADAKOTA2.jpeg">
+
+                </div>
+                <h3>TEXANAS DAKOTA</h3>
+                <p class="description">Ecocuero Forradas por dentro con Diseño volcado y herrajes en su diseño, perfectas para jeans, vestidos, looks urbanos o de fin de semana. 
+👢 Talles 36 AL 40
+Desliza para ver más fotos ↔️</p>
+
+                <p class="price">$78.000</p>
+            </div>
+
+<div class="product-card">
+                
+                <div class="carrusel">
+                    <img src="aura1.jpeg">
+                    
+                    <img src="aura.jpeg">
+                </div>
+                <h3>TEXANAS AURA </h3>
+                <p class="description">MATERIAL: Cuero vacuno gamuzon 
+ALTURA DE CAÑA: 17cm
+ALTURA DE TACO: 6cm
+COLORES: negro liso- chocolate-coco
+👢 Talles del 36 AL 40
+Desliza para ver más fotos ↔️</p>
+
+                <p class="price">$77.000</p>
+            </div>
+<div class="product-card">
+                
+                <div class="carrusel">
+                    <img src="jagger.jpeg">
+                    <img src="jagger1.jpeg">
+                    <img src="jagger2.jpeg">
+                </div>
+                <h3>TEXANAS JAGGER</h3>
+                <p class="description">MATERIAL: Gamuzon negro de textura suave 
+diseño western integrado con tachas plateadas de alto brillo
+👢 TALLES: del 36 AL 40
+Desliza para ver más fotos ↔️</p>
+
+                <p class="price">$71.000</p>
+            </div>
+<div class="product-card">
+                
+                <div class="carrusel">
+                    <img src="malaga.jpeg">
+                    <img src="malaga2.jpeg">
+                    <img src="malaga1.jpeg">
+                </div>
+                <h3>TEXANAS MALAGA</h3>
+                <p class="description">Base artesanal
+MATERIAL: cuero vacuno
+COLORES: Negro y Chocolate 
+👢 Horma Justa (recomendacion pedir un numero mas)
+TALLES: del 35 AL 42
+Desliza para ver más fotos ↔️</p>
+
+                <p class="price">$88.000</p>
+            </div>
+
+<div class="product-card">
+                
+                <div class="carrusel">
+                    <img src="mosul.jpeg">
+                    <img src="mosul1.jpeg">
+                    <img src="mosul2.jpeg">
+                </div>
+                <h3>BOTAS PAMPA</h3>
+                <p class="description">Base artesanal
+MATERIAL: Cuero vacuno Gamuzado
+COLORES: Negro, Chocolate y Arena
+👢TALLES: del 35 AL 42
+HORMA NORMAL
+Desliza para ver más fotos ↔️</p>
+
+                <p class="price">$80.000</p>
+            </div>
+
+<div class="product-card">
+                
+                <div class="carrusel">
+                    <img src="lula.jpeg">
+                    <img src="lula1.jpeg">
+                    <img src="lula2.jpeg">
+                </div>
+                <h3>BOTAS REBEL</h3>
+                <p class="description">Base artesanal
+MATERIAL: Cuero vacuno 
+COLORES: Negro Y Chocolate
+👢TALLES: del 35 AL 42
+HORMA NORMAL
+Desliza para ver más fotos ↔️</p>
+
+                <p class="price">$80.000</p>
+            </div>
+
+
+
+
+
+
+
+
+<div class="product-card">
+                
+                <div class="carrusel">
+                    <img src="rhae1.jpeg">
+                    <img src="rhae.jpeg">
+                    <img src="rhae2.jpeg">
+                </div>
+                <h3>BORCEGOS CLASICOS</h3>
+                <p class="description">Base artesanal
+MATERIAL: carpellada ecocuero con elastico
+Largo de caña: 11cm
+BASE expanso, ALTURA: 7cm
+👢TALLES: del 35 AL 40
+Desliza para ver más fotos ↔️</p>
+
+                <p class="price">$45.000</p>
+            </div>
+
+
+
+
+<div class="product-card">
+                
+                <div class="carrusel">
+                    <img src="ART UXIA.jpeg">
+                    
+                    <img src="ART UXIA1.jpeg">
+                </div>
+                <h3>BOTAS TOKYO </h3>
+                <p class="description">Base expanso
+Plataforma 8cm /largo: 34cm
+Cellada Ecocuero 
+👢 Horma Justa
+Desliza para ver más fotos ↔️</p>
+
+                <p class="price">$65.000</p>
+            </div>
+
+<div class="product-card">
+                
+                <div class="carrusel">
+                    <img src="karter.jpeg">
+                    
+                    <img src="karter1.jpeg">
+                    
+                    <img src="karter2.jpeg">
+                </div>
+                <h3>BORCEGOS KIRA</h3>
+                <p class="description">Borcego de caña media con efecto slouchy y tres hebillas metálicas 
+Base robusta, cómoda y estable 
+👢 Talles: Del 36 al 40
+Desliza para ver más fotos ↔️</p>
+
+                <p class="price">$77.000</p>
+            </div>
+<div class="product-card">
+                
+                <div class="carrusel">
+                  
+                    <img src="alania.jpeg">
+                    
+                    <img src="alania1.jpeg">
+                </div>
+                <h3>BORCEGOS ALANIA</h3>
+                <p class="description">Material Cuero vacuno
+Cierre interno 
+Colores: Negro y Chocolate
+Talles: del 35 al 40
+⁠HORMA NORMAL
+Desliza para ver más fotos ↔️</p>
+                <p class="price">$83.000</p>
+            </div>
+
+
+
+
+
+
+
+
+
+
+ <div class="product-card">
+                <img src="articulo100.jpeg">
+                <h3>BORCEGO URBANO </h3>
+                <p class="description">
+Material: P.U(Ecocuero de excelente calidad) 
+TALLES: 35 al 40
+.</p>
+                <p class="price">$48.000</p>
+            </div>
+
+
+            <div class="product-card">
+                <img src="zapato2.jpeg" alt="Zapato 2">
+                <h3>TEXANAS </h3>
+                <p class="description"> 
+Base Expanso, alto 6cm 
+Capellada eco cuero bordado 
+Largo de caña 36cm 
+TALLES: 35 al 40
+.</p>
+                <p class="price">$55.500</p>
+            </div>
+<div class="product-card">
+                <img src="sabash.jpeg" alt="Zapato 2">
+                <h3>SABASH</h3>
+                <p class="description">Talles del 35 al 40 .</p>
+                <p class="price">$65.000</p>
+            </div>
+
+            <div class="product-card">
+                <img src="zapato3.jpeg" alt="Zapato 3">
+                <h3>SELENE</h3>
+                <p class="description">Bota de caña alta con diseño minimal
+
+
+Su punta fina y taco medio aportan altura y comodidad, hebilla metálica
+
+
+TALLES: del 36 al 40..</p>
+                <p class="price">$78.000</p>
+            </div>
+<div class="product-card">
+                
+                <div class="carrusel">
+                    <img src="artzaira1costado.jpeg">
+                    
+                    <img src="artzaira1.jpeg">
+                    
+                    <img src="artzaira1costado.jpeg.jpg">
+                </div>
+                <h3>BOTAS SHARK</h3>
+                <p class="description">Cuero vacuno 
+-Caña 37cm
+Detalles de hebillas 
+-Color: negro
+-Talles del 36 al 40
+Desliza para ver más fotos ↔️</p>
+                <p class="price">$89.000</p>
+            </div>
+            <div class="product-card">
+                <img src="zapato4.jpg.jpeg">
+                <h3>BOTAS AMBER </h3>
+                <p class="description">
+-Talles 35 al 40 
+- Base Expanso, alto 9cm 
+- Capellada Eco cuero 
+- Largo de caña 15cm  .</p>
+                <p class="price">$65.000</p>
+            </div>
+
+        </div>
+
+
+
+
+
+   <div class="container" style="margin-top: 10px;">
+    <h2 class="section-title">Carteras & Accesorios</h2>
+
+    <div class="product-grid">
+        <div class="product-card">
+            <img src="shopia.jpeg">
+            <h3>CARTERA SHOPIA</h3>
+            <p class="description">Medidas
+•33 cm de ancho
+•10 cm de profundidad
+•16 cm de alto.</p>
+            <p class="price">$59.000</p>
+        </div>
+        <div class="product-card">
+            <img src="cartera1.jpeg" alt="Cartera Negra">
+            <h3>TOTE BORDO</h3>
+            <p class="description">Elegancia y espacio ideal para oficina.</p>
+            <p class="price">$65.000</p>
+        </div>
+
+        <div class="product-card">
+            <div class="carrusel">
+                <img src="carterablanca.jpeg">
+                <img src="carterablanca1.jpeg">
+            </div>
+            <h3>Modelo Pia</h3>
+            <p class="description">Eco cuero. Color: Blanco/Marron. Desliza para ver más fotos ↔️</p>
+            <p class="price">$33.000</p>
+        </div>
+
+        <div class="product-card">
+            <img src="cartera2.jpeg" alt="Bandolera">
+            <h3>CARTERA VIENA PINK</h3>
+            <p class="description">Diseño romántico y femenino. Perfectas para salidas.</p>
+            <p class="price">$65.000</p>
+        </div>
+
+        <div class="product-card">
+            <img src="cartera3.jpeg" alt="Mochila">
+            <h3>TOTE URBANO BROWN</h3>
+            <p class="description">Súper práctica y canchera.</p>
+            <p class="price">$65.000</p>
+        </div>
+
+        <div class="product-card">
+            <div class="carrusel">
+                <img src="bolsitomiumiu.jpeg">
+                <img src="bolsitomiumiu1.jpeg">
+            </div>
+            <h3>Bolsito Miu Miu</h3>
+            <p class="description">Nuevo ingreso.</p>
+            <p class="price">$58.000</p>
+        </div>
+
+        <div class="product-card">
+            <div class="carrusel">
+                <img src="Minibag.jpeg">
+                <img src="Minibag1.jpeg">
+                <img src="Minibag2.jpeg">
+            </div>
+            <h3>MINIBAG TASH</h3>
+            <p class="description">Art Importado. Disponible en varios colores.</p>
+            <p class="price">$32.000</p>
+        </div>
+
+        <div class="product-card">
+            <div class="carrusel">
+                <img src="minibagpedre.jpeg">
+                <img src="minibagpedre1.jpeg">
+                <img src="minibagpedre2.jpeg">
+                <img src="minibagpedre3.jpeg">
+            </div>
+            <h3>MINIBAG PEDRE</h3>
+            <p class="description">Disponible en Negro/Beige/Marron/Verde. Incluye llavero 🩷</p>
+            <p class="price">$46.500</p>
+        </div>
+
+        <div class="product-card">
+            <div class="carrusel">
+                <img src="riñonerazara.jpeg">
+                <img src="riñonerazara1.jpeg">
+            </div>
+            <h3>RIÑONERA ZARA</h3>
+            <p class="description">Disponible en Negro/Beige/Marron.</p>
+            <p class="price">$47.000</p>
+        </div>
+
+        <div class="product-card">
+            <div class="carrusel">
+                <img src="maxiriñoneras.jpeg">
+                <img src="maxiriñoneras1.jpeg">
+                <img src="maxiriñoneras2.jpeg">
+            </div>
+            <h3>Maxiriñoneras Animal print</h3>
+            <p class="description">Medidas: 27x21 cm. Click para ver más fotos ↔️</p>
+            <p class="price">$55.000</p>
+        </div>
+
+    </div> </div>
+
+
+
+
+</div>  </div> </div> </div> </div> <div class="container" style="margin-top: 80px;"> 
+    <h2 class="section-title">Zapatillas</h2>
+    <div class="product-grid">
+            
+            <div class="product-card">
+                <img src="zapatilla1.jpeg" alt="Cartera Negra">
+                <h3>IMPORTADAS BRASILERAS 🇧🇷 ART. AIR FORCE 1</h3>
+                <p class="description">Talles del 34 al 43
+Se entregan con caja Nike 📦 .</p>
+                <p class="price">$65.000</p>
+            </div>
+<div class="product-card">
+    <div class="carrusel">
+        <img src="zapa9210.jpeg" alt="Zapatillas 9210 Negra">
+        <img src="zapa92101.jpeg" alt="Zapatillas 9210 Detalle">
+    </div>
+    
+    <h3>SNEAKERS </h3>
+    
+    <p class="description">
+        Importadas de Brasil 🇧🇷. Base súper liviana de expanso (3cm) con detalles en gamuza. 
+        Plantilla de alta densidad para máximo confort.
+        <br><strong>Colores:</strong> Negro / Beige / Blanco.
+        <br>Desliza para ver más fotos ↔️
+    </p>
+    
+    <p class="price">$53.000</p>
+</div>
+<div class="product-card">
+                
+                <div class="carrusel">
+                    <img src="forcelila.jpeg">
+                    
+                    <img src="forcelila1.jpeg">
+                    
+                    <img src=forcelila2.jpeg">
+                </div>
+                <h3>FORCE PIPA PERLADA LILA 💜 (Calidad Premium)</h3>
+                <p class="description">
+Talle del 34 al 39 👆🏻
+Se entregan en caja Nike plastificada 📦
+Deslizá para ver más fotos ↔️</p>
+                <p class="price">$68.000</p> </div>
+<div class="product-card">
+                
+                <div class="carrusel">
+                    <img src="SALMA.jpeg">
+                    
+                    <img src="SALMA1.jpeg">
+
+                </div>
+                <h3>ZAPATILLAS SALMA </h3>
+                <p class="description">
+colores: negro, blanco
+material: cuero 
+base: TR
+Disponible del 36 al 40 
+Deslizá para ver más fotos ↔️</p>
+                <p class="price">$65.000</p> </div>
+<div class="product-card">
+                
+                <div class="carrusel">
+                    <img src="art510.jpeg">
+                    
+                    <img src="art5101.jpeg">
+                    
+                    <img src="art512.jpeg">
+                </div>
+                <h3>ZAPATILLAS PREMIUM </h3>
+                <p class="description">
+3 COLORES: NEGRO | PLATA  |  ORO   
+
+MATERIAL:detalles en gamuza. Plantilla de espuma de alta densidad, tracción y forradas en la parte interior. 
+
+BASE:  De expanso. Súper livianas de 3 cm 
+Con cordón 
+HORMA REAL (Pedí el talle que usás habitualmente)
+Disponible del 36 al 40 
+Deslizá para ver más fotos ↔️</p>
+                <p class="price">$53.000</p> </div>
+<div class="product-card">
+                
+                <div class="carrusel">
+                    <img src="morrisprint.jpeg">
+                    
+                    <img src="morrisprint1.jpeg">
+                </div>
+                <h3>MORRIS PRINT </h3>
+                <p class="description">
+Material: Cuero
+Deslizá para ver más fotos ↔️</p>
+                <p class="price">$89.000</p> </div> 
+</div>
+
+    <a href="https://wa.me/5493773400260?text=Hola!%20Vi%20el%20catalogo%20y%20quiero%20consultar" class="whatsapp-float" target="_blank">
+        📞
+    </a>
+</div>  </div> <div class="container" style="background: white; padding: 30px; border-radius: 15px; margin-top: 100px; text-align: left;">
+    <h2 style="color: #ff7f50;">Nosotros</h2>
+🚀 <p style="font-size: 1.1rem; line-height: 1.6; color: #555;">
+        Estamos ubicados en Chascomus "Calle paso s/n entre solis y garay". 
+        En <strong>Helen Zapatos</strong> buscamos traerte lo último en tendencia pero priorizando siempre tu comodidad.
+        <br><br>
+        📦 Hacemos envíos a todo el país.<br>
+        💳 Aceptamos todas las tarjetas.
+    </p>
+</div>
+    <footer>
+        <p>© 2024 Helen Zapatos - Catálogo Digital</p>
+    </footer>
+<div id="visorZoom" class="modal-zoom" onclick="cerrarZoom()">
+        <img id="fotoGrande" src="">
+        <p style="position:absolute; bottom:20px; color:white; font-size:0.8rem;">Tocá en cualquier lado para cerrar</p>
+    </div> <script>
+        // --- 1. LÓGICA DEL BOTÓN DE WHATSAPP (Que ya tenías) ---
+        // (Nota: Si ya lo tenías como enlace directo <a> no hace falta script para esto, 
+        // pero por las dudas dejamos el script limpio solo para el zoom).
+
+        // --- 2. LÓGICA DEL ZOOM DE FOTOS ---
+        
+        // Buscamos el visor negro y la etiqueta de imagen vacía
+        const visor = document.getElementById('visorZoom');
+        const fotoGrande = document.getElementById('fotoGrande');
+
+        // Buscamos TODAS las imágenes que están dentro de tarjetas de producto
+        const todasLasFotos = document.querySelectorAll('.product-card img');
+
+        // A cada foto le enseñamos qué hacer cuando la tocan
+        todasLasFotos.forEach(foto => {
+            foto.addEventListener('click', function() {
+                visor.style.display = "flex"; // Mostramos el fondo negro
+                fotoGrande.src = this.src;    // Copiamos la foto que tocaron al visor grande
+            });
+        });
+
+        // Función para cerrar (se activa al tocar el fondo negro)
+        function cerrarZoom() {
+            visor.style.display = "none";
+        }
+    </script>
+</body>
+
+</html>
